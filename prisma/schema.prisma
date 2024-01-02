@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+// User post
+model Post {
+  id   Int    @id @default(autoincrement())
+  slug String @db.VarChar(70)
+
+  // Post content data
+  title   String @db.VarChar(100)
+  content String @db.Text
+
+  // Post author
+  authorId Int  @map("author_id")
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Post dates
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  postRatings PostRating[]
+
+  // Indices
+  @@unique([slug, authorId])
+  @@index([slug, authorId])
+  @@map("posts")
+}
+
+// Post ratings
+model PostRating {
+  // User relation
+  userId Int  @map("user_id")
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Post relation
+  postId Int  @map("post_id")
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Rating value
+  value Rating @default(NONE)
+
+  // Dates
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map(name: "updated_at")
+
+  @@id([userId, postId])
+  @@map("post_rating")
+}
+
+// User
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @db.VarChar(60)
+
+  // User dates
+  createdAt DateTime @default(now()) @map(name: "created_at")
+
+  // Relations
+  posts        Post[]
+  post_ratings PostRating[]
+
+  password String @db.VarChar(255)
+
+  @@unique([username])
+  @@map("users")
+}
+
+enum Rating {
+  NONE
+  LIKE
+  DISLIKE
+}

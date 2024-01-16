@@ -4,9 +4,15 @@ import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { UserModule } from './user';
 import { AuthModule } from './auth';
+import { PostModule } from './post';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), AuthModule, UserModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
+    UserModule,
+    PostModule,
+  ],
   providers: [
     {
       provide: APP_PIPE,

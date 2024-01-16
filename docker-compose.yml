@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  # Database for persistent
+  database:
+    container_name: postgresql
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: blog
+    ports:
+      - 5432:5432

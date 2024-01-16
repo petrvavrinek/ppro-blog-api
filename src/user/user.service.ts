@@ -1,14 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma';
-import { Prisma, User } from '@prisma/client';
-import {
-  DynamicClientExtensionThisBuiltin,
-  ExtendsHook,
-} from '@prisma/client/runtime/library';
 
 type UserPrismaExtension = ReturnType<
   (typeof UserService)['prototype']['createExtension']
 >;
+
 @Injectable()
 export class UserService {
   private _extension: UserPrismaExtension;

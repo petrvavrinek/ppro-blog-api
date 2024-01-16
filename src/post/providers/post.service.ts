@@ -3,7 +3,7 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import slugify from 'slugify';
 import { User } from 'src/user/entities';
-import { Post } from './entities';
+import { Post } from '../entities';
 
 @Injectable()
 export class PostService {

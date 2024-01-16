@@ -1,12 +1,10 @@
-import { Module } from '@nestjs/common';
-
-import { AuthModule } from 'src/auth';
-
-import { PostController } from './post.controller';
-import { PostService } from './post.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { Post } from './entities';
+import { Module } from '@nestjs/common';
+import { AuthModule } from 'src/auth';
 import { UserModule } from 'src/user';
+import { PostController } from './controllers';
+import { Post } from './entities';
+import { PostService } from './providers';
 
 @Module({
   controllers: [PostController],

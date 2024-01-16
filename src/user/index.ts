@@ -1,2 +1,2 @@
 export { UserModule } from './user.module';
-export { UserService } from './user.service';
+export { UserService } from './providers';

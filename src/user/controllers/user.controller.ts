@@ -5,7 +5,8 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { UserService } from '../providers/user.service';
+import { UserId } from 'src/auth/decorators';
 
 @Controller('user')
 export class UserController {
@@ -17,5 +18,10 @@ export class UserController {
     if (!user) throw new NotFoundException();
 
     return user;
+  }
+
+  @Get("me")
+  async handleFindMe(@UserId() userId: number) {
+    return this.userService.findById(userId);
   }
 }

@@ -9,9 +9,9 @@ import {
   ParseIntPipe,
   Post,
 } from '@nestjs/common';
-import { PostService } from './post.service';
+import { PostService } from '../providers/post.service';
 import { Authorized } from 'src/auth/decorators';
-import { CreatePostDto } from './schema';
+import { CreatePostDto } from '../schema';
 import { UserId } from 'src/auth/decorators/user-id.decorator';
 
 @Controller('post')

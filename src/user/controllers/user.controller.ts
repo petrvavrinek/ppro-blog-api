@@ -14,7 +14,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get(':id')
-  async findUser(@Param('id', ParseIntPipe) userId: number) {
+  async handleFindUser(@Param('id', ParseIntPipe) userId: number) {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException();
 

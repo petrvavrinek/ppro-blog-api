@@ -12,7 +12,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  async login(@Body() body: LoginCredentialsDto) {
+  async handleLogin(@Body() body: LoginCredentialsDto) {
     const userData = await this.authService.validate(
       body.username,
       body.password,
@@ -25,7 +25,7 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() body: RegisterCredentials) {
+  async handleRegister(@Body() body: RegisterCredentials) {
     const userData = await this.userService.create({
       password: await this.authService.getPasswordHash(body.password),
       username: body.username,

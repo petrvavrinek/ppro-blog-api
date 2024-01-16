@@ -1,32 +1,14 @@
+import { EntityRepository } from '@mikro-orm/core';
+import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/prisma';
-
-type UserPrismaExtension = ReturnType<
-  (typeof UserService)['prototype']['createExtension']
->;
+import { User } from './entities';
 
 @Injectable()
 export class UserService {
-  private _extension: UserPrismaExtension;
-
-  constructor(private readonly prisma: PrismaService) {
-    this._extension = this.createExtension();
-  }
-
-  // Source: https://github.com/prisma/prisma-client-extensions/blob/main/obfuscated-fields/script.ts
-  createExtension() {
-    return this.prisma.$extends({
-      result: {
-        user: {
-          password: {
-            needs: {},
-            compute: () => undefined,
-          },
-        },
-      },
-    });
-  }
+  constructor(
+    @InjectRepository(User)
+    private readonly UserRepository: EntityRepository<User>,
+  ) {}
 
   /**
    * Find user by given ID
@@ -34,11 +16,7 @@ export class UserService {
    * @returns User or null
    */
   findById(id: number) {
-    return this._extension.user.findFirst({
-      where: {
-        id,
-      },
-    });
+    return this.UserRepository.findOne({ id });
   }
 
   /**
@@ -46,15 +24,13 @@ export class UserService {
    * @param username
    * @returns User or null
    */
-  findByUsername(username: string, select?: Prisma.UserSelect) {
-    return this._extension.user.findFirst({
-      where: { username },
-      select,
-    });
+  findByUsername(username: string) {
+    return this.UserRepository.findOne({ username });
   }
 
   findUserDataIncludingPasswordByUsername(username: string) {
-    return this.prisma.user.findFirst({ where: { username } });
+    // TODO: Include passwor
+    return this.UserRepository.findOne({ username });
   }
 
   /**
@@ -62,7 +38,9 @@ export class UserService {
    * @param data
    * @returns
    */
-  create(data: Prisma.UserCreateInput) {
-    return this._extension.user.create({ data });
+  async create(data: Omit<User, 'id'>) {
+    const user = this.UserRepository.create(data);
+    await this.UserRepository.insert(user);
+    return user;
   }
 }

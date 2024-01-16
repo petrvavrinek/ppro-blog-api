@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
-import { UserService } from 'src/user';
+
 import * as bcrypt from 'bcrypt';
+import { UserService } from 'src/user';
+import { User } from 'src/user/entities';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async decryptAccessToken(token: string): Promise<{ sub: string, username: string } | null> {
+  async decryptAccessToken(
+    token: string,
+  ): Promise<{ sub: string; username: string } | null> {
     try {
       return this.jwtService.decode(token);
     } catch {

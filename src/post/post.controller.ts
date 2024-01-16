@@ -39,7 +39,7 @@ export class PostController {
   ) {
     const post = await this.postService.findById(id);
     if (!post) throw new NotFoundException();
-    if (post.authorId != userId) throw new ForbiddenException();
+    if (post.author.id != userId) throw new ForbiddenException();
 
     await this.postService.deleteById(id);
   }

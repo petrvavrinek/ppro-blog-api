@@ -25,7 +25,7 @@ model Post {
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
-  postRatings PostRating[]
+  postLikes PostLike[]
 
   // Indices
   @@unique([slug, authorId])
@@ -34,7 +34,7 @@ model Post {
 }
 
 // Post ratings
-model PostRating {
+model PostLike {
   // User relation
   userId Int  @map("user_id")
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -43,15 +43,12 @@ model PostRating {
   postId Int  @map("post_id")
   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  // Rating value
-  value Rating @default(NONE)
-
   // Dates
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map(name: "updated_at")
 
   @@id([userId, postId])
-  @@map("post_rating")
+  @@map("post_likes")
 }
 
 // User
@@ -63,8 +60,8 @@ model User {
   createdAt DateTime @default(now()) @map(name: "created_at")
 
   // Relations
-  posts        Post[]
-  post_ratings PostRating[]
+  posts     Post[]
+  postLikes PostLike[]
 
   password String @db.VarChar(255)
 

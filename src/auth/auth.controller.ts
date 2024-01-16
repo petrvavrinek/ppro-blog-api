@@ -27,6 +27,7 @@ export class AuthController {
     );
 
     if (!userData) throw new UnauthorizedException();
+    
 
     const accessToken = this.authService.getAccessToken(userData);
     return { accessToken };

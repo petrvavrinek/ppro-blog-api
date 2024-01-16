@@ -5,6 +5,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { AuthModule } from './auth';
 import { DatabaseModule } from './database.module';
 import { PostModule } from './post';
+import { PostCommentModule } from './post-comment';
 import { UserModule } from './user';
 
 @Module({
@@ -14,6 +15,7 @@ import { UserModule } from './user';
     AuthModule,
     UserModule,
     PostModule,
+    PostCommentModule,
   ],
   providers: [
     {

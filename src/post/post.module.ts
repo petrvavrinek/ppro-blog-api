@@ -14,5 +14,6 @@ import { PostService } from './providers';
     UserModule,
     MikroOrmModule.forFeature({ entities: [Post] }),
   ],
+  exports: [PostService],
 })
 export class PostModule {}

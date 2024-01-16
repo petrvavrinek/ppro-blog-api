@@ -12,7 +12,9 @@ import {
 import { PostService } from '../providers/post.service';
 import { Authorized } from 'src/auth/decorators';
 import { CreatePostDto } from '../schema';
-import { UserId } from 'src/auth/decorators/user-id.decorator';
+
+import { CurrentUserId } from 'src/auth/decorators';
+import { CurrentUser } from 'src/user/decorators';
 
 @Controller('post')
 export class PostController {
@@ -20,7 +22,7 @@ export class PostController {
 
   @Authorized()
   @Post()
-  handleCreatePost(@UserId() userId: number, @Body() data: CreatePostDto) {
+  handleCreatePost(@CurrentUser() userId: number, @Body() data: CreatePostDto) {
     return this.postService.create(userId, data.title, data.content);
   }
 
@@ -35,7 +37,7 @@ export class PostController {
   @Delete(':slug')
   async handleDeletePost(
     @Param('id', ParseIntPipe) id: number,
-    @UserId() userId: number,
+    @CurrentUserId() userId: number,
   ) {
     const post = await this.postService.findById(id);
     if (!post) throw new NotFoundException();

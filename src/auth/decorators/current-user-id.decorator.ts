@@ -1,6 +1,9 @@
 import { ExecutionContext, Logger, createParamDecorator } from '@nestjs/common';
 
-export const UserId = createParamDecorator((_, ctx: ExecutionContext) => {
+/**
+ * Does not fetch user data, only return user ID (number)
+ */
+export const CurrentUserId = createParamDecorator((_, ctx: ExecutionContext) => {
   const req = ctx.switchToHttp().getRequest();
 
   const id = req.user?.userId;

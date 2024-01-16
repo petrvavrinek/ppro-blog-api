@@ -5,8 +5,9 @@ import {
   Param,
   ParseIntPipe,
 } from '@nestjs/common';
+import { CurrentUser } from '../decorators';
+import { User } from '../entities';
 import { UserService } from '../providers/user.service';
-import { UserId } from 'src/auth/decorators';
 
 @Controller('user')
 export class UserController {
@@ -20,8 +21,8 @@ export class UserController {
     return user;
   }
 
-  @Get("me")
-  async handleFindMe(@UserId() userId: number) {
-    return this.userService.findById(userId);
+  @Get('me')
+  async handleFindMe(@CurrentUser() user: User) {
+    return user;
   }
 }

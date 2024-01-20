@@ -1,5 +1,16 @@
-import { Entity, ManyToOne, PrimaryKey, Property, t } from '@mikro-orm/core';
+import {
+  Collection,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryKey,
+  Property,
+  Ref,
+  t,
+} from '@mikro-orm/core';
 import { User } from 'src/user/entities';
+import { PostTag } from './post-tag.entity';
 
 @Entity()
 export class Post {
@@ -23,4 +34,7 @@ export class Post {
 
   @Property({ onUpdate: () => new Date() })
   updatedAt: Date = new Date();
+
+  @ManyToMany(() => PostTag, 'posts', { owner: true, eager: true })
+  tags = new Collection<PostTag>(this);
 }

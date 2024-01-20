@@ -19,7 +19,7 @@ export class FetchUserPipe implements PipeTransform {
 
     if (value instanceof User) return value;
 
-    const user = await this.userService.findById(value);
+    const user = await this.userService.findRawById(value);
 
     if (!user)
       throw new InternalServerErrorException(

@@ -15,6 +15,66 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "name": {
+          "name": "name",
+          "type": "varchar(40)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 40,
+          "mappedType": "string"
+        }
+      },
+      "name": "post_tag",
+      "schema": "public",
+      "indexes": [
+        {
+          "columnNames": [
+            "name"
+          ],
+          "composite": false,
+          "keyName": "post_tag_name_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "name"
+          ],
+          "composite": false,
+          "keyName": "post_tag_name_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "post_tag_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "username": {
           "name": "username",
           "type": "varchar(60)",
@@ -262,6 +322,73 @@
             "id"
           ],
           "referencedTableName": "public.post",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "post_id": {
+          "name": "post_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "post_tag_id": {
+          "name": "post_tag_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "post_tags",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "post_tags_pkey",
+          "columnNames": [
+            "post_id",
+            "post_tag_id"
+          ],
+          "composite": true,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "post_tags_post_id_foreign": {
+          "constraintName": "post_tags_post_id_foreign",
+          "columnNames": [
+            "post_id"
+          ],
+          "localTableName": "public.post_tags",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.post",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "post_tags_post_tag_id_foreign": {
+          "constraintName": "post_tags_post_tag_id_foreign",
+          "columnNames": [
+            "post_tag_id"
+          ],
+          "localTableName": "public.post_tags",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.post_tag",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

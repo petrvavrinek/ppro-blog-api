@@ -20,18 +20,20 @@ import { UserPhotoService } from '../providers';
 import { Authorized } from 'src/auth/decorators';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { SharpPipe } from 'src/utils/pipes';
+import { UserMapper } from '../mappers';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly userPhotoService: UserPhotoService,
+    private readonly userMapper: UserMapper
   ) {}
 
   @Authorized()
   @Get('me')
   async handleFindMe(@CurrentUser() user: User) {
-    return user;
+    return this.userMapper.mapObject(user);
   }
 
   @Authorized()

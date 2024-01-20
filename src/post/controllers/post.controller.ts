@@ -15,6 +15,7 @@ import { CreatePostDto } from '../schema';
 
 import { CurrentUserId } from 'src/auth/decorators';
 import { CurrentUser } from 'src/user/decorators';
+import { User } from 'src/user/entities';
 
 @Controller('post')
 export class PostController {
@@ -22,8 +23,8 @@ export class PostController {
 
   @Authorized()
   @Post()
-  handleCreatePost(@CurrentUser() userId: number, @Body() data: CreatePostDto) {
-    return this.postService.create(userId, data.title, data.content);
+  handleCreatePost(@CurrentUser() user: User, @Body() data: CreatePostDto) {
+    return this.postService.create(user, data.title, data.content, data.tags);
   }
 
   @Get(':slug')

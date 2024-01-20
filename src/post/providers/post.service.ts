@@ -1,9 +1,12 @@
-import { EntityRepository } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
 import slugify from 'slugify';
 import { User } from 'src/user/entities';
 import { Post } from '../entities';
+import { PostTagService } from './post-tag.service';
+
+const SLUG_LENGTH = 60;
 
 @Injectable()
 export class PostService {
@@ -12,7 +15,20 @@ export class PostService {
   constructor(
     @InjectRepository(Post)
     private readonly PostRepository: EntityRepository<Post>,
+    private readonly EntityManager: EntityManager,
+    private readonly postTagService: PostTagService,
   ) {}
+
+  private generateSlug(title: string, date = new Date()) {
+    const dateStr = date.getTime().toString();
+    let slug = slugify(title.substring(0, SLUG_LENGTH), {
+      trim: true,
+      lower: true,
+    });
+    if (slug.length + 1 + dateStr.length > SLUG_LENGTH)
+      slug = slug.substring(0, SLUG_LENGTH - dateStr.length - 1);
+    return slug + '-' + dateStr;
+  }
 
   /**
    * Create new post
@@ -21,24 +37,23 @@ export class PostService {
    * @param content Post content
    * @returns New post
    */
-  async create(author: User | User['id'], title: string, content: string) {
-    // Limig slug to 60 characters
-    const slug = slugify(title.substring(0, 60), { trim: true, lower: true });
+  async create(author: User, title: string, content: string, tags: string[]) {
+    const createdAt = new Date();
 
-    /** Allows to insert by ID or User object */
-    let user: User = new User();
-    if (author instanceof User) user = author;
-    else user.id = author;
+    // Limig slug to 60 characters
+
+    const tagEntities = await this.postTagService.defineTags(tags);
 
     const newPost = new Post();
-    newPost.author = user;
-    newPost.slug = slug;
+    newPost.author = author;
+    newPost.slug = this.generateSlug(title, createdAt);
     newPost.content = content;
     newPost.title = title;
+    newPost.tags.set(tagEntities);
+    newPost.createdAt = createdAt;
 
     const post = this.PostRepository.create(newPost);
-
-    await this.PostRepository.insert(post);
+    await this.EntityManager.persistAndFlush(post);
 
     this._logger.debug(
       `Post ${post.id} has been created by user ${post.author.id}`,

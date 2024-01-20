@@ -1,8 +1,6 @@
 import { Injectable, PipeTransform } from '@nestjs/common';
 import path from 'path';
 import sharp from 'sharp';
-import fs from 'fs';
-import { Stream } from 'stream';
 
 type SharpPipeInput = (instance: sharp.Sharp) => sharp.Sharp;
 

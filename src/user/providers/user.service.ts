@@ -18,11 +18,15 @@ export class UserService {
    * @returns User or null
    */
   async findById(id: number) {
-    const user = await this.UserRepository.findOne(
+    const user = await this.findRawById(id);
+    return user && this.userMapper.mapObject(user);
+  }
+
+  async findRawById(id: number) {
+    return this.UserRepository.findOne(
       { id },
       { exclude: ['password'] as const },
     );
-    return user && this.userMapper.mapObject(user);
   }
 
   /**

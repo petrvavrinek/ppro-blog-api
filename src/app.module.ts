@@ -1,3 +1,4 @@
+import { DriverType, StorageModule } from '@codebrew/nestjs-storage';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
@@ -16,6 +17,17 @@ import { UserModule } from './user';
     UserModule,
     PostModule,
     PostCommentModule,
+    StorageModule.forRoot({
+      default: 'local',
+      disks: {
+        local: {
+          driver: DriverType.LOCAL,
+          config: {
+            root: process.cwd(),
+          },
+        },
+      },
+    }),
   ],
   providers: [
     {

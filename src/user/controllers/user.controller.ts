@@ -4,6 +4,7 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { CurrentUser } from '../decorators';
 import { User } from '../entities';
@@ -24,5 +25,10 @@ export class UserController {
   @Get('me')
   async handleFindMe(@CurrentUser() user: User) {
     return user;
+  }
+
+  @Patch('me')
+  async handlePatchMe(@CurrentUser() user: User) {
+
   }
 }

@@ -2,12 +2,14 @@ import { EntityRepository } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
 import { User } from '../entities';
+import { UserMapper } from '../mappers';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly UserRepository: EntityRepository<User>,
+    private readonly userMapper: UserMapper,
   ) {}
 
   /**
@@ -15,8 +17,9 @@ export class UserService {
    * @param id User ID
    * @returns User or null
    */
-  findById(id: number) {
-    return this.UserRepository.findOne({ id });
+  async findById(id: number) {
+    const user = await this.UserRepository.findOne({ id });
+    return user && this.userMapper.mapObject(user);
   }
 
   /**
@@ -24,13 +27,17 @@ export class UserService {
    * @param username
    * @returns User or null
    */
-  findByUsername(username: string) {
-    return this.UserRepository.findOne({ username });
+  async findByUsername(username: string) {
+    const user = await this.UserRepository.findOne({ username });
+    return user && this.userMapper.mapObject(user);
   }
 
   findUserDataIncludingPasswordByUsername(username: string) {
     // TODO: Include passwor
-    return this.UserRepository.findOne({ username });
+    return this.UserRepository.findOne(
+      { username },
+      { fields: ['*', 'password'] as const },
+    );
   }
 
   /**

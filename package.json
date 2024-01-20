@@ -21,6 +21,7 @@
     "mikro-orm": "cross-env TS_NODE_PROJECT='./tsconfig.json' ts-node -r tsconfig-paths/register ./node_modules/@mikro-orm/cli/cli.js --config ./database/mikro-orm.config.ts"
   },
   "dependencies": {
+    "@codebrew/nestjs-storage": "^0.1.7",
     "@mikro-orm/core": "^6.0.4",
     "@mikro-orm/nestjs": "^5.2.3",
     "@mikro-orm/postgresql": "^6.0.4",
@@ -30,6 +31,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
+    "@slynova/flydrive": "^1.0.3",
     "bcrypt": "^5.1.1",
     "nestjs-zod": "^3.0.0",
     "passport": "^0.7.0",

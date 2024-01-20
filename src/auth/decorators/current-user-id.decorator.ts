@@ -7,6 +7,7 @@ export const CurrentUserId = createParamDecorator((_, ctx: ExecutionContext) => 
   const req = ctx.switchToHttp().getRequest();
 
   const id = req.user?.userId;
+  console.log(req.user);
 
   if (!id)
     Logger.warn(

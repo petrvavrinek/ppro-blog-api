@@ -13,14 +13,14 @@ export class UserPhotoService {
   ) {}
 
   async setUserPhoto(userId: string | number, photo: Buffer) {
-    await this._disk.put(`static/user_photo/${userId}`, photo);
+    await this._disk.put(`public/user_photo/${userId}`, photo);
   }
 
   getUserPhotoUrl(userId: string | number) {
     const baseUrl = this.configService.get('BASE_URL');
     // Timestamp needs to be passed because of cache
     return (
-      baseUrl + `/static/user_photo/${userId}?t=${this._timestamp.getTime()}`
+      baseUrl + `/public/user_photo/${userId}?t=${this._timestamp.getTime()}`
     );
   }
 }

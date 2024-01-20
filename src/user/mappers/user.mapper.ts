@@ -9,14 +9,14 @@ export class UserMapper {
     readonly userPhotoService: UserPhotoService,
   ) {}
 
-  mapObject(data: User) {
+  mapObject(data: Omit<User, 'password'>) {
     return {
       ...data,
       photo: this.userPhotoService.getUserPhotoUrl(data.id),
     };
   }
 
-  mapObjects(data: User[]) {
+  mapObjects(data: Omit<User, 'password'>[]) {
     return data.map(this.mapObject);
   }
 }

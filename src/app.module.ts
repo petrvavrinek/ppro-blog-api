@@ -8,7 +8,9 @@ import { DatabaseModule } from './database.module';
 import { PostModule } from './post';
 import { PostCommentModule } from './post-comment';
 import { UserModule } from './user';
+import path from 'path';
 
+console.log(path.join(__dirname, '..', '..', 'public'));
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

@@ -18,7 +18,10 @@ export class UserService {
    * @returns User or null
    */
   async findById(id: number) {
-    const user = await this.UserRepository.findOne({ id });
+    const user = await this.UserRepository.findOne(
+      { id },
+      { exclude: ['password'] as const },
+    );
     return user && this.userMapper.mapObject(user);
   }
 
@@ -28,7 +31,10 @@ export class UserService {
    * @returns User or null
    */
   async findByUsername(username: string) {
-    const user = await this.UserRepository.findOne({ username });
+    const user = await this.UserRepository.findOne(
+      { username },
+      { exclude: ['password'] as const },
+    );
     return user && this.userMapper.mapObject(user);
   }
 

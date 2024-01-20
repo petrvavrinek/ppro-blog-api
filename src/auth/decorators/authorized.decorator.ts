@@ -1,4 +1,6 @@
-import { UseGuards } from "@nestjs/common";
-import { JwtAuthGuard } from "../guards";
+import { UseGuards, applyDecorators } from '@nestjs/common';
+import { JwtAuthGuard } from '../guards';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
-export const Authorized = () => UseGuards(JwtAuthGuard);
+export const Authorized = () =>
+  applyDecorators(UseGuards(JwtAuthGuard), ApiBearerAuth());

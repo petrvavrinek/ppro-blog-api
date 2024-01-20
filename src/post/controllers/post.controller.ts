@@ -8,18 +8,19 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { PostService } from '../providers/post.service';
 import { Authorized } from 'src/auth/decorators';
+import { PostService } from '../providers/post.service';
 import { CreatePostDto } from '../schema';
 
 import { CurrentUserId } from 'src/auth/decorators';
 import { CurrentUser } from 'src/user/decorators';
 import { User } from 'src/user/entities';
-import { PostMapperInterceptor } from '../interceptors';
 import { CurrentPage } from 'src/utils/decorators';
 import { ListOptions } from 'src/utils/list.options';
+import { PostMapperInterceptor } from '../interceptors';
 
 @Controller('post')
 export class PostController {
@@ -27,8 +28,15 @@ export class PostController {
 
   @UseInterceptors(PostMapperInterceptor)
   @Get('newest')
-  async handleGetNewestPosts(@CurrentPage() page: ListOptions) {
-    return this.postService.findNewestPosts(page);
+  async handleGetNewestPosts(
+    @CurrentPage() page: ListOptions,
+    @Query('tags') tags?: string,
+  ) {
+    const tagArray = tags?.split(',') ?? [];
+
+    return tagArray.length > 0
+      ? this.postService.findNewestPostsByTags(tagArray, page)
+      : this.postService.findNewestPosts(page);
   }
 
   @UseInterceptors(PostMapperInterceptor)

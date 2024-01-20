@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { User } from 'src/user/entities';
-import { LessThanOrEqual, Repository } from 'typeorm';
+import { In, LessThanOrEqual, Repository } from 'typeorm';
 import { Post } from '../entities';
 import { PostTagService } from './post-tag.service';
 import { ListOptions } from 'src/utils/list.options';
@@ -90,8 +90,8 @@ export class PostService {
 
   /**
    * Find newest posts
-   * @param options 
-   * @returns 
+   * @param options
+   * @returns
    */
   findNewestPosts(options?: ListOptions) {
     return this.PostRepository.find({
@@ -100,6 +100,29 @@ export class PostService {
         : {},
       take: options?.take,
       skip: options?.skip,
+      relations: ['tags'] as const,
+      order: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  /**
+   * Find newest posts by tags
+   * @param tags Tags to find
+   * @param options List options
+   * @returns Posts
+   */
+  async findNewestPostsByTags(tags: string[], options?: ListOptions) {
+    return this.PostRepository.find({
+      where: {
+        tags: {
+          name: In(tags),
+        },
+      },
+      take: options?.take,
+      skip: options?.skip,
+      relations: ['tags'] as const,
       order: {
         createdAt: 'desc',
       },

@@ -8,6 +8,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostService } from '../providers/post.service';
 import { Authorized } from 'src/auth/decorators';
@@ -16,17 +17,20 @@ import { CreatePostDto } from '../schema';
 import { CurrentUserId } from 'src/auth/decorators';
 import { CurrentUser } from 'src/user/decorators';
 import { User } from 'src/user/entities';
+import { PostMapperInterceptor } from '../interceptors';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @UseInterceptors(PostMapperInterceptor)
   @Authorized()
   @Post()
   handleCreatePost(@CurrentUser() user: User, @Body() data: CreatePostDto) {
     return this.postService.create(user, data.title, data.content, data.tags);
   }
 
+  @UseInterceptors(PostMapperInterceptor)
   @Get(':slug')
   async handleGetPost(@Param('slug') slug: string) {
     const post = await this.postService.findBySlug(slug);

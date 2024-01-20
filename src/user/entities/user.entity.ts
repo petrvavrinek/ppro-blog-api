@@ -1,13 +1,21 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
-  @Property({ length: 60 })
+  @Column({ length: 60 })
   username!: string;
 
-  @Property({ length: 255, hidden: true })
+  @Column({ length: 255, select: false })
   password!: string;
+
+  @CreateDateColumn()
+  createdAt = new Date();
 }

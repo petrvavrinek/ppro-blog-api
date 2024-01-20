@@ -21,6 +21,7 @@ import { Authorized } from 'src/auth/decorators';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { SharpPipe } from 'src/utils/pipes';
 import { UserMapper } from '../mappers';
+import { UserMapperInterceptor } from '../interceptors';
 
 @Controller('user')
 export class UserController {
@@ -31,9 +32,10 @@ export class UserController {
   ) {}
 
   @Authorized()
+  @UseInterceptors(UserMapperInterceptor)
   @Get('me')
   async handleFindMe(@CurrentUser() user: User) {
-    return this.userMapper.mapObject(user);
+    return user;
   }
 
   @Authorized()
@@ -42,6 +44,7 @@ export class UserController {
     return user;
   }
 
+  @UseInterceptors(UserMapperInterceptor)
   @Get(':id')
   async handleFindUser(@Param('id', ParseIntPipe) userId: number) {
     const user = await this.userService.findById(userId);

@@ -1,40 +1,40 @@
-import {
-  Collection,
-  Entity,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  PrimaryKey,
-  Property,
-  Ref,
-  t,
-} from '@mikro-orm/core';
 import { User } from 'src/user/entities';
 import { PostTag } from './post-tag.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Post {
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
-  @Property({ length: 60, index: true })
+  @Column({ length: 60, unique: true })
   slug!: string;
 
-  @Property({ length: 150 })
+  @Column({ length: 150 })
   title!: string;
 
-  @Property({ type: t.text })
+  @Column('text')
   content: string;
 
   @ManyToOne(() => User, { eager: true })
   author!: User;
 
-  @Property()
+  @CreateDateColumn()
   createdAt: Date = new Date();
 
-  @Property({ onUpdate: () => new Date() })
+  @UpdateDateColumn()
   updatedAt: Date = new Date();
 
-  @ManyToMany(() => PostTag, 'posts', { owner: true, eager: true })
-  tags = new Collection<PostTag>(this);
+  @JoinTable()
+  @ManyToMany(() => PostTag, (tag) => tag.posts, { cascade: true })
+  tags: PostTag[];
 }

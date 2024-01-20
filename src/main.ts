@@ -10,6 +10,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
+  app.disable("x-powered-by");
   
   app.useStaticAssets(path.join(__dirname, '..', '..', 'public'), {
     prefix: '/public/',

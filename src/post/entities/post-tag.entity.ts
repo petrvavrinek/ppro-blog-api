@@ -1,20 +1,14 @@
-import {
-  Collection,
-  Entity,
-  ManyToMany,
-  PrimaryKey,
-  Property,
-} from '@mikro-orm/core';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Post } from './post.entity';
 
 @Entity()
 export class PostTag {
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToMany(() => Post, 'tags', { hidden: true })
-  posts = new Collection<Post>(this);
+  @ManyToMany(() => Post, (post) => post.tags)
+  posts: Post[];
 
-  @Property({ length: 40, index: true, unique: true })
+  @Column({ length: 40, unique: true })
   name: string;
 }

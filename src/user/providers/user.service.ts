@@ -1,6 +1,6 @@
-import { EntityRepository } from '@mikro-orm/core';
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../entities';
 import { UserMapper } from '../mappers';
 
@@ -8,8 +8,7 @@ import { UserMapper } from '../mappers';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly UserRepository: EntityRepository<User>,
-    private readonly userMapper: UserMapper,
+    private readonly UserRepository: Repository<User>,
   ) {}
 
   /**
@@ -17,16 +16,12 @@ export class UserService {
    * @param id User ID
    * @returns User or null
    */
-  async findById(id: number) {
-    const user = await this.findRawById(id);
-    return user && this.userMapper.mapObject(user);
+  findById(id: number) {
+    return this.findRawById(id);
   }
 
-  async findRawById(id: number) {
-    return this.UserRepository.findOne(
-      { id },
-      { exclude: ['password'] as const },
-    );
+  findRawById(id: number) {
+    return this.UserRepository.findOne({ where: { id } });
   }
 
   /**
@@ -34,20 +29,16 @@ export class UserService {
    * @param username
    * @returns User or null
    */
-  async findByUsername(username: string) {
-    const user = await this.UserRepository.findOne(
-      { username },
-      { exclude: ['password'] as const },
-    );
-    return user && this.userMapper.mapObject(user);
+  findByUsername(username: string) {
+    return this.UserRepository.findOne({ where: { username } });
   }
 
   findUserDataIncludingPasswordByUsername(username: string) {
     // TODO: Include passwor
-    return this.UserRepository.findOne(
-      { username },
-      { fields: ['*', 'password'] as const },
-    );
+    return this.UserRepository.findOne({
+      where: { username },
+      select: ['password', 'id'],
+    });
   }
 
   /**
@@ -55,9 +46,8 @@ export class UserService {
    * @param data
    * @returns
    */
-  async create(data: Omit<User, 'id'>) {
+  async create(data: Partial<Omit<User, 'id'>>) {
     const user = this.UserRepository.create(data);
-    await this.UserRepository.insert(user);
-    return user;
+    return this.UserRepository.save(user);
   }
 }

@@ -1,8 +1,8 @@
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { User } from 'src/user/entities';
+import { Repository } from 'typeorm';
 import { Post } from '../entities';
 import { PostTagService } from './post-tag.service';
 
@@ -14,8 +14,7 @@ export class PostService {
 
   constructor(
     @InjectRepository(Post)
-    private readonly PostRepository: EntityRepository<Post>,
-    private readonly EntityManager: EntityManager,
+    private readonly PostRepository: Repository<Post>,
     private readonly postTagService: PostTagService,
   ) {}
 
@@ -43,17 +42,16 @@ export class PostService {
     // Limig slug to 60 characters
 
     const tagEntities = await this.postTagService.defineTags(tags);
-
     const newPost = new Post();
     newPost.author = author;
     newPost.slug = this.generateSlug(title, createdAt);
     newPost.content = content;
     newPost.title = title;
-    newPost.tags.set(tagEntities);
+    newPost.tags = tagEntities;
     newPost.createdAt = createdAt;
 
-    const post = this.PostRepository.create(newPost);
-    await this.EntityManager.persistAndFlush(post);
+    let post = this.PostRepository.create(newPost);
+    post = await this.PostRepository.save(post);
 
     this._logger.debug(
       `Post ${post.id} has been created by user ${post.author.id}`,
@@ -67,8 +65,8 @@ export class PostService {
    * @param slug Slug
    * @returns
    */
-  async findBySlug(slug: string) {
-    return this.PostRepository.findOne({ slug });
+  findBySlug(slug: string) {
+    return this.PostRepository.findOne({ where: { slug } });
   }
 
   /**
@@ -76,8 +74,8 @@ export class PostService {
    * @param id Post ID to delete
    * @returns
    */
-  async deleteById(id: number) {
-    return this.PostRepository.nativeDelete({ id });
+  deleteById(id: number) {
+    return this.PostRepository.delete({ id });
   }
 
   /**
@@ -85,7 +83,7 @@ export class PostService {
    * @param id
    * @returns
    */
-  async findById(id: number) {
-    return this.PostRepository.findOne({ id });
+  findById(id: number) {
+    return this.PostRepository.findOne({ where: { id } });
   }
 }

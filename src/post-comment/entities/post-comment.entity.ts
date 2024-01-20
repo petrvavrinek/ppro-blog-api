@@ -1,13 +1,20 @@
-import { Entity, ManyToOne, PrimaryKey, Property, t } from '@mikro-orm/core';
 import { Post } from 'src/post/entities';
 import { User } from 'src/user/entities';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class PostComment {
-  @PrimaryKey()
+  @PrimaryGeneratedColumn()
   id!: number;
 
-  @Property({ type: t.text })
+  @Column('text')
   content: string;
 
   @ManyToOne(() => User)
@@ -16,9 +23,9 @@ export class PostComment {
   @ManyToOne(() => Post)
   post: Post;
 
-  @Property()
+  @CreateDateColumn()
   createdAt: Date = new Date();
 
-  @Property({ onUpdate: () => new Date() })
+  @UpdateDateColumn()
   updatedAt: Date = new Date();
 }

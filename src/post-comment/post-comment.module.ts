@@ -1,5 +1,5 @@
-import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth';
 import { PostModule } from 'src/post';
 import { UserModule } from 'src/user';
@@ -9,7 +9,7 @@ import { PostCommentService } from './providers';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature({ entities: [PostComment] }),
+    TypeOrmModule.forFeature([PostComment]),
     PostModule,
     UserModule,
     AuthModule,

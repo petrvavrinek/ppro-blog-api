@@ -1,60 +1,59 @@
-import { EntityRepository, QueryOrder } from '@mikro-orm/core';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 import { Post, PostTag } from '../entities';
-import { InjectRepository } from '@mikro-orm/nestjs';
+import { ListOptions } from 'src/utils/list.options';
 
 @Injectable()
 export class PostTagService {
-  private readonly _postTagsTableName: string;
-
   constructor(
     @InjectRepository(PostTag)
-    private readonly PostTagRepository: EntityRepository<PostTag>,
-    private readonly EntityManager: EntityManager,
-  ) {
-    const metadata = EntityManager.getMetadata();
-    this._postTagsTableName = metadata.get(PostTag).tableName;
-
-    this.findMostPopularTags('test');
-  }
+    private readonly PostTagRepository: Repository<PostTag>,
+  ) {}
 
   /**
    * Define tags in database
    * @param tags Tag array
    * @returns Tag entities
    */
-  defineTags(tags: string[]) {
-    const tagEntities = tags.map((e) => {
+  async defineTags(tags: string[]) {
+    const existingTags = await this.PostTagRepository.find({
+      where: {
+        name: In(tags),
+      },
+    });
+    const nonExistingTags = tags.filter(
+      (e) => !existingTags.find((t) => t.name == e),
+    );
+
+    let tagEntities = nonExistingTags.map((e) => {
       const tag = new PostTag();
       tag.name = e;
       return tag;
     });
-
-    return this.PostTagRepository.upsertMany(tagEntities);
+    tagEntities = await this.PostTagRepository.save(tagEntities);
+    return [...tagEntities, ...existingTags];
   }
 
-  async findMostPopularTags(term: string) {
-    console.log(this._postTagsTableName);
-    // let knex = this.EntityManager.fork()
-    //   .createQueryBuilder(PostTag, 'tag')
-    //   .getKnex();
-    // knex = knex
-    //   .select(
-    //     '*',
-    //     `(SELECT COUNT(*) FROM ${this._postTagsTableName} p WHERE p.id = tag.id) as c`,
-    //     'tag',
-    //   )
-    //   .from(this._postTagsTableName);
-
-    // const res = await this.EntityManager.getConnection().execute(knex);
-    // console.log(res);
-
-    const tags = await this.EntityManager.fork();
-    // , 'COUNT(posts.id) as post_count'
-
-    // .orderBy({ post_count: QueryOrder.DESC })
-
-    return tags;
+  /**
+   * Find most used tags by name
+   * @param term Term to find
+   * @param options List options
+   * @returns Array of tags
+   */
+  async findMostPopularTagsByName(
+    term: string,
+    options?: ListOptions,
+  ): Promise<PostTagWithPostCount[]> {
+    const result = await this.PostTagRepository.createQueryBuilder('tag')
+      .loadRelationCountAndMap('tag.numPosts', 'tag.posts')
+      .where('tag.name LIKE :term', { term: `${term}%` })
+      .limit(options?.take)
+      .offset(options?.skip)
+      .getMany();
+    return result as never as PostTagWithPostCount[];
   }
 }
+type PostTagWithPostCount = Pick<PostTag, 'id' | 'name'> & {
+  numPosts: number;
+};

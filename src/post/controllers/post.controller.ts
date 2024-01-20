@@ -18,10 +18,18 @@ import { CurrentUserId } from 'src/auth/decorators';
 import { CurrentUser } from 'src/user/decorators';
 import { User } from 'src/user/entities';
 import { PostMapperInterceptor } from '../interceptors';
+import { CurrentPage } from 'src/utils/decorators';
+import { ListOptions } from 'src/utils/list.options';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
+
+  @UseInterceptors(PostMapperInterceptor)
+  @Get('newest')
+  async handleGetNewestPosts(@CurrentPage() page: ListOptions) {
+    return this.postService.findNewestPosts(page);
+  }
 
   @UseInterceptors(PostMapperInterceptor)
   @Authorized()

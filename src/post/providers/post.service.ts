@@ -2,9 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { User } from 'src/user/entities';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { Post } from '../entities';
 import { PostTagService } from './post-tag.service';
+import { ListOptions } from 'src/utils/list.options';
 
 const SLUG_LENGTH = 60;
 
@@ -85,5 +86,23 @@ export class PostService {
    */
   findById(id: number) {
     return this.PostRepository.findOne({ where: { id } });
+  }
+
+  /**
+   * Find newest posts
+   * @param options 
+   * @returns 
+   */
+  findNewestPosts(options?: ListOptions) {
+    return this.PostRepository.find({
+      where: options?.since
+        ? { createdAt: LessThanOrEqual(options.since) }
+        : {},
+      take: options?.take,
+      skip: options?.skip,
+      order: {
+        createdAt: 'desc',
+      },
+    });
   }
 }

@@ -17,6 +17,6 @@ export class UserMapper {
   }
 
   mapObjects(data: Omit<User, 'password'>[]) {
-    return data.map(this.mapObject);
+    return data.map(e => this.mapObject(e));
   }
 }

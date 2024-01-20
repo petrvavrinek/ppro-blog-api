@@ -14,6 +14,6 @@ export class PostMapper {
   }
 
   mapObjects(posts: Post[]) {
-    return posts.map(this.mapObject);
+    return posts.map((e) => this.mapObject(e));
   }
 }

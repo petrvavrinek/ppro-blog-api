@@ -107,6 +107,23 @@ export class PostService {
     });
   }
 
+  findNewestPostsByAuthorId(author: User, options?: ListOptions) {
+    return this.PostRepository.find({
+      where: {
+        ...(options?.since
+          ? { createdAt: LessThanOrEqual(options.since) }
+          : {}),
+        author,
+      },
+      take: options?.take,
+      skip: options?.skip,
+      relations: ['tags'] as const,
+      order: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
   /**
    * Find newest posts by tags
    * @param tags Tags to find

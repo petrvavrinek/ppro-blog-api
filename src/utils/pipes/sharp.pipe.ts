@@ -10,7 +10,6 @@ export const SharpPipe = (input: SharpPipeInput, extension?: string) => {
     implements PipeTransform<Express.Multer.File, Promise<Express.Multer.File>>
   {
     async transform(image: Express.Multer.File): Promise<Express.Multer.File> {
-      console.log(image);
       let instance = sharp(image.buffer);
       instance = input(instance);
 

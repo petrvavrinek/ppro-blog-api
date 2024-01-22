@@ -8,10 +8,12 @@ import path from 'path';
 async function bootstrap() {
   patchNestJsSwagger();
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    cors: true,
+  });
   app.setGlobalPrefix('api');
-  app.disable("x-powered-by");
-  
+  app.disable('x-powered-by');
+
   app.useStaticAssets(path.join(__dirname, '..', '..', 'public'), {
     prefix: '/public/',
   });

@@ -28,7 +28,6 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly userPhotoService: UserPhotoService,
-    private readonly userMapper: UserMapper
   ) {}
 
   @Authorized()

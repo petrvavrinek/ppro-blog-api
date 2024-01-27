@@ -11,7 +11,7 @@ import {
   Query,
   UseInterceptors,
 } from '@nestjs/common';
-import { Authorized } from 'src/auth/decorators';
+import { AllowAnonymous, Authorized } from 'src/auth/decorators';
 import { PostService } from '../providers/post.service';
 import { CreatePostDto } from '../schema';
 
@@ -27,16 +27,25 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @UseInterceptors(PostMapperInterceptor)
+  @AllowAnonymous()
+  @Authorized()
   @Get('newest')
   async handleGetNewestPosts(
     @CurrentPage() page: ListOptions,
+    @CurrentUserId() currentUserId?: number,
     @Query('tags') tags?: string,
   ) {
     const tagArray = tags?.split(',') ?? [];
 
     return tagArray.length > 0
-      ? this.postService.findNewestPostsByTags(tagArray, page)
-      : this.postService.findNewestPosts(page);
+      ? this.postService.findNewestPostsByTags(tagArray, {
+          list: page,
+          finderId: currentUserId,
+        })
+      : this.postService.findNewestPosts({
+          finderId: currentUserId,
+          list: page,
+        });
   }
 
   @UseInterceptors(PostMapperInterceptor)
@@ -47,9 +56,16 @@ export class PostController {
   }
 
   @UseInterceptors(PostMapperInterceptor)
+  @Authorized()
+  @AllowAnonymous()
   @Get(':slug')
-  async handleGetPost(@Param('slug') slug: string) {
-    const post = await this.postService.findBySlug(slug);
+  async handleGetPost(
+    @Param('slug') slug: string,
+    @CurrentUserId() currentUserId: number,
+  ) {
+    const post = await this.postService.findBySlug(slug, {
+      finderId: currentUserId,
+    });
     if (!post) throw new NotFoundException();
     return post;
   }

@@ -7,10 +7,17 @@ export class PostMapper {
   constructor(private readonly userMapper: UserMapper) {}
 
   mapObject(post: Post) {
-    return {
+    const staticPost = {
       ...post,
       author: this.userMapper.mapObject(post.author),
+      tags: post?.tags?.map((e) => e.name),
     };
+
+    if ('favouriteByUser' in post) {
+      staticPost['favouriteByUser'] = Boolean(post.favouriteByUser);
+    }
+
+    return staticPost;
   }
 
   mapObjects(posts: Post[]) {

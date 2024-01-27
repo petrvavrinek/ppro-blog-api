@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import slugify from 'slugify';
 import { User } from 'src/user/entities';
-import { In, LessThanOrEqual, Repository } from 'typeorm';
+import { IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 import { Post } from '../entities';
+import { PostListOptions } from '../types';
 import { PostTagService } from './post-tag.service';
-import { ListOptions } from 'src/utils/list.options';
 
 const SLUG_LENGTH = 60;
 
@@ -66,8 +66,12 @@ export class PostService {
    * @param slug Slug
    * @returns
    */
-  findBySlug(slug: string) {
-    return this.PostRepository.findOne({ where: { slug } });
+  async findBySlug(slug: string, options?: Pick<PostListOptions, 'finderId'>) {
+    const [post] = await this.findByQuery(
+      (query) => query.where('post.slug = :slug', { slug }),
+      options?.finderId,
+    );
+    return post;
   }
 
   /**
@@ -79,13 +83,21 @@ export class PostService {
     return this.PostRepository.delete({ id });
   }
 
+  async findByIdRaw(id: number) {
+    return this.PostRepository.findOne({ where: { id } });
+  }
+
   /**
    * Find post by ID
    * @param id
    * @returns
    */
-  findById(id: number) {
-    return this.PostRepository.findOne({ where: { id } });
+  async findById(id: number, options?: Pick<PostListOptions, 'finderId'>) {
+    const [post] = await this.findByQuery(
+      (query) => query.where('post.id = :postId', { postId: id }),
+      options?.finderId,
+    );
+    return post;
   }
 
   /**
@@ -93,35 +105,27 @@ export class PostService {
    * @param options
    * @returns
    */
-  findNewestPosts(options?: ListOptions) {
-    return this.PostRepository.find({
-      where: options?.since
-        ? { createdAt: LessThanOrEqual(options.since) }
-        : {},
-      take: options?.take,
-      skip: options?.skip,
-      relations: ['tags'] as const,
-      order: {
-        createdAt: 'desc',
-      },
-    });
+  findNewestPosts(options?: PostListOptions) {
+    return this.findByQuery(
+      (query) =>
+        query
+          .orderBy('post.createdAt', 'DESC')
+          .take(options?.list?.take)
+          .skip(options?.list?.skip),
+      options?.finderId,
+    );
   }
 
-  findNewestPostsByAuthorId(author: User, options?: ListOptions) {
-    return this.PostRepository.find({
-      where: {
-        ...(options?.since
-          ? { createdAt: LessThanOrEqual(options.since) }
-          : {}),
-        author,
-      },
-      take: options?.take,
-      skip: options?.skip,
-      relations: ['tags'] as const,
-      order: {
-        createdAt: 'desc',
-      },
-    });
+  findNewestPostsByAuthorId(author: User, options?: PostListOptions) {
+    return this.findByQuery(
+      (query) =>
+        query
+          .where('author.id = :author', { author: author.id })
+          .take(options?.list?.take)
+          .skip(options?.list?.skip)
+          .orderBy('post.createdAt', 'DESC'),
+      options?.finderId,
+    );
   }
 
   /**
@@ -130,19 +134,49 @@ export class PostService {
    * @param options List options
    * @returns Posts
    */
-  async findNewestPostsByTags(tags: string[], options?: ListOptions) {
-    return this.PostRepository.find({
-      where: {
-        tags: {
-          name: In(tags),
-        },
+  async findNewestPostsByTags(tags: string[], options?: PostListOptions) {
+    return this.findByQuery(
+      (query) => {
+        query
+          .leftJoinAndSelect('post.tags', 'tag2', 'tag2.name IN (:...tags)', {
+            tags,
+          })
+          .where('tag2.id IS NOT NULL')
+          .orderBy('post.createdAt', 'DESC')
+          .take(options?.list?.take)
+          .skip(options?.list?.skip);
       },
-      take: options?.take,
-      skip: options?.skip,
-      relations: ['tags'] as const,
-      order: {
-        createdAt: 'desc',
-      },
-    });
+      options?.finderId,
+    );
+  }
+
+  async findByQuery(
+    queryParam: (q: SelectQueryBuilder<Post>) => void,
+    finderId?: number,
+  ) {
+    const query = this.PostRepository.createQueryBuilder('post')
+      .select()
+      .loadRelationCountAndMap('post.favouriteBy', 'post.favouriteBy');
+
+    query
+      .leftJoinAndSelect('post.tags', 'tag')
+      .leftJoinAndSelect('post.author', 'author');
+
+    if (finderId) {
+      query
+        .setParameter('finder', finderId)
+        .loadRelationCountAndMap(
+          'post.favouriteByUser',
+          'post.favouriteBy',
+          'favouriteByUser',
+          (q) =>
+            q.andWhere('favouriteByUser.userId = :finder', {
+              finder: finderId ?? 0,
+            }),
+        );
+    }
+
+    queryParam(query);
+    return query.getMany();
   }
 }

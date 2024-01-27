@@ -5,6 +5,8 @@ import { patchNestJsSwagger } from 'nestjs-zod';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import path from 'path';
 
+import "./typeorm.config";
+
 async function bootstrap() {
   patchNestJsSwagger();
 

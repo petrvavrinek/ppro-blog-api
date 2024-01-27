@@ -7,9 +7,11 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PostFavourite } from 'src/post-favourite/entities';
 
 @Entity()
 export class Post {
@@ -37,4 +39,7 @@ export class Post {
   @JoinTable()
   @ManyToMany(() => PostTag, (tag) => tag.posts, { cascade: true })
   tags: PostTag[];
+
+  @OneToMany(() => PostFavourite, (favourite) => favourite.post)
+  favouriteBy: PostFavourite;
 }

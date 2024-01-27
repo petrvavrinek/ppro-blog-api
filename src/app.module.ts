@@ -7,8 +7,8 @@ import { AuthModule } from './auth';
 import { DatabaseModule } from './database.module';
 import { PostModule } from './post';
 import { PostCommentModule } from './post-comment';
+import { PostFavouriteModule } from './post-favourite';
 import { UserModule } from './user';
-import path from 'path';
 
 @Module({
   imports: [
@@ -18,6 +18,7 @@ import path from 'path';
     UserModule,
     PostModule,
     PostCommentModule,
+    PostFavouriteModule,
     StorageModule.forRoot({
       default: 'local',
       disks: {

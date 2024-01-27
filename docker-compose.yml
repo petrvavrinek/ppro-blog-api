@@ -12,3 +12,26 @@ services:
       POSTGRES_DB: blog
     ports:
       - 5432:5432
+    networks:
+      - api
+  api:
+    container_name: ppro-api
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      DB_HOST: postgresql
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: blog
+    ports:
+      - 3000:3000
+    networks:
+      - api
+
+networks:
+  api:

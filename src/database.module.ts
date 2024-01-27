@@ -8,10 +8,12 @@ export const getDatabaseConfig = (
   configService: ConfigService,
 ): DataSourceOptions => ({
   entities: ['dist/**/*.entity.js'],
-  url: configService.getOrThrow('DATABASE_URI'),
-  migrations: [
-    path.join(__dirname, '..', 'database', 'migrations', '*.js'),
-  ],
+  host: configService.getOrThrow('DB_HOST'),
+  port: configService.get('DB_PORT'),
+  username: configService.getOrThrow('DB_USER'),
+  password: configService.get('DB_PASSWORD'),
+  database: configService.getOrThrow('DB_NAME'),
+  migrations: [path.join(__dirname, '..', 'database', 'migrations', '*.js')],
   type: 'postgres',
 });
 

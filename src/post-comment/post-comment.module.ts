@@ -6,6 +6,7 @@ import { UserModule } from 'src/user';
 import { PostCommentController } from './controllers';
 import { PostComment } from './entities';
 import { PostCommentService } from './providers';
+import { PostCommentMapper } from './mappers';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { PostCommentService } from './providers';
     UserModule,
     AuthModule,
   ],
-  providers: [PostCommentService],
+  providers: [PostCommentService, PostCommentMapper],
   controllers: [PostCommentController],
 })
 export class PostCommentModule {}

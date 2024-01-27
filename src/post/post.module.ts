@@ -11,6 +11,6 @@ import { PostService, PostTagService } from './providers';
   controllers: [PostController, UserPostController],
   providers: [PostService, PostTagService, PostMapper],
   imports: [AuthModule, UserModule, TypeOrmModule.forFeature([Post, PostTag])],
-  exports: [PostService],
+  exports: [PostService, PostMapper],
 })
 export class PostModule {}

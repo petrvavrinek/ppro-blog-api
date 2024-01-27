@@ -24,6 +24,10 @@ export class UserService {
     return this.UserRepository.findOne({ where: { id } });
   }
 
+  updateOne(user: Partial<User> & Pick<User, 'id'>) {
+    return this.UserRepository.save(user);
+  }
+
   /**
    * Find user by given username
    * @param username

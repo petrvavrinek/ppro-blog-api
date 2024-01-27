@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   FileTypeValidator,
   Get,
@@ -22,6 +23,7 @@ import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { SharpPipe } from 'src/utils/pipes';
 import { UserMapper } from '../mappers';
 import { UserMapperInterceptor } from '../interceptors';
+import { UpdateUserDto } from '../schema';
 
 @Controller('user')
 export class UserController {
@@ -30,17 +32,20 @@ export class UserController {
     private readonly userPhotoService: UserPhotoService,
   ) {}
 
-  @Authorized()
   @UseInterceptors(UserMapperInterceptor)
+  @Authorized()
   @Get('me')
   async handleFindMe(@CurrentUser() user: User) {
     return user;
   }
 
+  @UseInterceptors(UserMapperInterceptor)
   @Authorized()
   @Patch('me')
-  async handlePatchMe(@CurrentUser() user: User) {
-    return user;
+  async handlePatchMe(@CurrentUser() user: User, @Body() body: UpdateUserDto) {
+    Object.assign(user, body);
+
+    return this.userService.updateOne(user);
   }
 
   @UseInterceptors(UserMapperInterceptor)

@@ -9,6 +9,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Authorized, CurrentUserId } from 'src/auth/decorators';
 import { PostService } from 'src/post/providers';
@@ -18,6 +19,7 @@ import { CurrentPage } from 'src/utils/decorators';
 import { PageData } from 'src/utils/decorators/page.decorator';
 import { PostCommentService } from '../providers';
 import { CreatePostCommentDto } from '../schema';
+import { PostCommentMapperInterceptor } from '../interceptors';
 
 @Controller()
 export class PostCommentController {
@@ -26,6 +28,7 @@ export class PostCommentController {
     private readonly postCommentService: PostCommentService,
   ) {}
 
+  @UseInterceptors(PostCommentMapperInterceptor)
   @Get('post/:id/comment')
   handleGetPostComments(
     @Param('id', ParseIntPipe) postId: number,
@@ -34,6 +37,7 @@ export class PostCommentController {
     return this.postCommentService.findManyByPostId(postId, page);
   }
 
+  @UseInterceptors(PostCommentMapperInterceptor)
   @Authorized()
   @Post('post/:id/comment')
   async handleCreateComment(

@@ -25,7 +25,10 @@ export class PostCommentService {
   }
 
   async findById(id: number) {
-    return this.PostCommentRepository.findOne({ where: { id } });
+    return this.PostCommentRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
   }
 
   /**
@@ -44,11 +47,11 @@ export class PostCommentService {
    */
   async findManyByPostId(postId: number, options?: ListOptions) {
     return this.PostCommentRepository.find({
-      where: { id: postId },
+      where: { post: { id: postId } },
       skip: options?.skip,
       take: options?.take,
       order: { createdAt: 'desc' },
-      relations: ['author'] as const,
+      relations: ['author', 'post', 'post.author'] as const,
     });
   }
 }

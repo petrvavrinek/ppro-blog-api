@@ -2,8 +2,8 @@ version: '3.1'
 
 services:
   # Database for persistent
-  database:
-    container_name: postgresql
+  postgres:
+    container_name: postgres
     image: postgres
     restart: always
     environment:
@@ -23,13 +23,30 @@ services:
       - .env
     environment:
       PORT: 3000
-      DB_HOST: postgresql
+      DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: user
       DB_PASSWORD: password
       DB_NAME: blog
     ports:
       - 3000:3000
+    networks:
+      - api
+  migration:
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: blog
+    command: ['./wait-for-it/wait-for-it.sh', 'postgres:5432', '--', 'yarn', 'migrate']
+    depends_on:
+      - postgres
     networks:
       - api
 

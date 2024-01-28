@@ -62,5 +62,11 @@ COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 # Public directory
 RUN mkdir ./public
 
+RUN git clone https://github.com/vishnubob/wait-for-it.git
+
+# Copy package json
+COPY --chown=node:node ./package.json .
+COPY --chown=node:node ./tsconfig.json .
+
 # Start the server using the production build
 CMD [ "node", "dist/src/main.js" ]

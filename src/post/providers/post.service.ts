@@ -4,7 +4,7 @@ import slugify from 'slugify';
 import { User } from 'src/user/entities';
 import { IsNull, Repository, SelectQueryBuilder } from 'typeorm';
 import { Post } from '../entities';
-import { PostListOptions } from '../types';
+import { PostListOptions, PostListOrderOptions } from '../types';
 import { PostTagService } from './post-tag.service';
 
 const SLUG_LENGTH = 60;
@@ -61,6 +61,19 @@ export class PostService {
     return post;
   }
 
+  async updatePost(post: Partial<Post> & Pick<Post, 'id'>, tags?: string[]) {
+    const tagEntities = tags && (await this.postTagService.defineTags(tags));
+
+    const data = await this.findByIdRaw(post.id);
+    if (!data) return false;
+    Object.assign(data, post);
+
+    if (tagEntities) {
+      data.tags = tagEntities;
+    }
+    await this.PostRepository.save(data);
+  }
+
   /**
    * Blog item slug
    * @param slug Slug
@@ -84,7 +97,10 @@ export class PostService {
   }
 
   async findByIdRaw(id: number) {
-    return this.PostRepository.findOne({ where: { id } });
+    return this.PostRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
   }
 
   /**
@@ -105,27 +121,43 @@ export class PostService {
    * @param options
    * @returns
    */
-  findNewestPosts(options?: PostListOptions) {
+  findNewestPosts(options?: PostListOrderOptions) {
     return this.findByQuery(
-      (query) =>
-        query
-          .orderBy('post.createdAt', 'DESC')
-          .take(options?.list?.take)
-          .skip(options?.list?.skip),
+      (query) => {
+        query.take(options?.list?.take).skip(options?.list?.skip);
+        this.applyOrder(query, options?.order);
+      },
       options?.finderId,
     );
   }
 
   findNewestPostsByAuthorId(author: User, options?: PostListOptions) {
     return this.findByQuery(
-      (query) =>
+      (query) => {
         query
           .where('author.id = :author', { author: author.id })
           .take(options?.list?.take)
           .skip(options?.list?.skip)
-          .orderBy('post.createdAt', 'DESC'),
+          .orderBy('post.createdAt', 'DESC');
+      },
       options?.finderId,
     );
+  }
+
+  private applyOrder(
+    query: SelectQueryBuilder<Post>,
+    order: PostListOrderOptions['order'],
+  ) {
+    if (order === 'favourite') {
+      query
+        .addSelect(
+          '(SELECT COUNT(*) FROM post_favourite AS "favourite" WHERE "favourite"."postId" = "post"."id")',
+          'fav_count',
+        )
+        .orderBy('fav_count', 'DESC');
+      return;
+    }
+    query.orderBy('post.createdAt', 'DESC');
   }
 
   /**
@@ -134,7 +166,7 @@ export class PostService {
    * @param options List options
    * @returns Posts
    */
-  async findNewestPostsByTags(tags: string[], options?: PostListOptions) {
+  async findNewestPostsByTags(tags: string[], options?: PostListOrderOptions) {
     return this.findByQuery(
       (query) => {
         query
@@ -142,9 +174,10 @@ export class PostService {
             tags,
           })
           .where('tag2.id IS NOT NULL')
-          .orderBy('post.createdAt', 'DESC')
           .take(options?.list?.take)
           .skip(options?.list?.skip);
+
+        this.applyOrder(query, options?.order);
       },
       options?.finderId,
     );
@@ -156,7 +189,11 @@ export class PostService {
   ) {
     const query = this.PostRepository.createQueryBuilder('post')
       .select()
-      .loadRelationCountAndMap('post.favouriteBy', 'post.favouriteBy');
+      .loadRelationCountAndMap(
+        'post.favouriteBy',
+        'post.favouriteBy',
+        'favouriteBy',
+      );
 
     query
       .leftJoinAndSelect('post.tags', 'tag')

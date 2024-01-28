@@ -4,3 +4,7 @@ export type PostListOptions = {
   list?: ListOptions;
   finderId?: number;
 };
+
+export type PostListOrderOptions = PostListOptions & {
+  order?: 'favourite';
+};

@@ -7,13 +7,14 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UseInterceptors,
 } from '@nestjs/common';
 import { AllowAnonymous, Authorized } from 'src/auth/decorators';
 import { PostService } from '../providers/post.service';
-import { CreatePostDto } from '../schema';
+import { CreatePostDto, UpdatePostDto } from '../schema';
 
 import { CurrentUserId } from 'src/auth/decorators';
 import { CurrentUser } from 'src/user/decorators';
@@ -21,6 +22,7 @@ import { User } from 'src/user/entities';
 import { CurrentPage } from 'src/utils/decorators';
 import { ListOptions } from 'src/utils/list.options';
 import { PostMapperInterceptor } from '../interceptors';
+import { Post as PostType } from '../entities';
 
 @Controller('post')
 export class PostController {
@@ -34,6 +36,7 @@ export class PostController {
     @CurrentPage() page: ListOptions,
     @CurrentUserId() currentUserId?: number,
     @Query('tags') tags?: string,
+    @Query('order') order?: string,
   ) {
     const tagArray = tags?.split(',') ?? [];
 
@@ -41,10 +44,12 @@ export class PostController {
       ? this.postService.findNewestPostsByTags(tagArray, {
           list: page,
           finderId: currentUserId,
+          order: order as never,
         })
       : this.postService.findNewestPosts({
           finderId: currentUserId,
           list: page,
+          order: order as never,
         });
   }
 
@@ -68,6 +73,23 @@ export class PostController {
     });
     if (!post) throw new NotFoundException();
     return post;
+  }
+
+  @Authorized()
+  @Patch(':id')
+  async handleUpdatePost(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUserId() currentUserId: number,
+    @Body() body: UpdatePostDto,
+  ) {
+    const post = await this.postService.findByIdRaw(id);
+    if (!post) throw new NotFoundException();
+    if (post.author.id != currentUserId) throw new ForbiddenException();
+
+    body.title && (post.title = body.title);
+    body.content && (post.content = body.content);
+
+    await this.postService.updatePost(post, body.tags);
   }
 
   @Authorized()

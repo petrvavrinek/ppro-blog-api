@@ -17,12 +17,14 @@ export class PostTagService {
    * @returns Tag entities
    */
   async defineTags(tags: string[]) {
+    const uniqueTags = [...new Set(tags)];
+
     const existingTags = await this.PostTagRepository.find({
       where: {
-        name: In(tags),
+        name: In(uniqueTags),
       },
     });
-    const nonExistingTags = tags.filter(
+    const nonExistingTags = uniqueTags.filter(
       (e) => !existingTags.find((t) => t.name == e),
     );
 

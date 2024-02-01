@@ -1,4 +1,10 @@
-import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from 'src/user';
 import { AuthService } from '../providers/auth.service';
 import { LoginCredentialsDto } from '../schema/login-credentials.dto';
@@ -26,6 +32,9 @@ export class AuthController {
 
   @Post('register')
   async handleRegister(@Body() body: RegisterCredentials) {
+    const foundUser = await this.userService.findByUsername(body.username);
+    if (foundUser) throw new BadRequestException('User is already registered');
+
     const userData = await this.userService.create({
       password: await this.authService.getPasswordHash(body.password),
       username: body.username,

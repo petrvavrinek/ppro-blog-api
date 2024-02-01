@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   FileTypeValidator,
@@ -44,6 +45,12 @@ export class UserController {
   @Patch('me')
   async handlePatchMe(@CurrentUser() user: User, @Body() body: UpdateUserDto) {
     Object.assign(user, body);
+
+    if (body.username) {
+      const foundUser = await this.userService.findByUsername(body.username);
+      if (foundUser)
+        throw new BadRequestException('User already exist with this username');
+    }
 
     return this.userService.updateOne(user);
   }

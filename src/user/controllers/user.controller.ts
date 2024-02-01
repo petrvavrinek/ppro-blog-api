@@ -44,13 +44,12 @@ export class UserController {
   @Authorized()
   @Patch('me')
   async handlePatchMe(@CurrentUser() user: User, @Body() body: UpdateUserDto) {
-    Object.assign(user, body);
-
-    if (body.username) {
+    if (body.username && user.username != body.username) {
       const foundUser = await this.userService.findByUsername(body.username);
       if (foundUser)
         throw new BadRequestException('User already exist with this username');
     }
+    Object.assign(user, body);
 
     return this.userService.updateOne(user);
   }
